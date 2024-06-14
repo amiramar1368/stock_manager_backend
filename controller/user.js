@@ -26,7 +26,6 @@ export class UserController {
               id: user.id,
               fullname: user.fullname,
               is_2FA_active: user.is_2FA_active,
-              secretKey: user.secretKey,
               permissions,
             };
             if (!user.is_2FA_active) {
@@ -91,7 +90,7 @@ export class UserController {
       if (err) {
         return res.sendFailureResponse(500, "Error while generating QR Code");
       }
-      return res.sendSuccessResponse(200, { qrCodeUrl, secret: req.user.secretKey });
+      return res.sendSuccessResponse(200, { qrCodeUrl});
     });
   }
 
