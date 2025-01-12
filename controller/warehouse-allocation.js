@@ -54,6 +54,8 @@ export class WarehouseAllocationController {
   }
 
   static async getAllWarehouseAllocation(req, res) {
+    let { page = 1, limit = 50} = req.query;
+    const offset = (page - 1) * limit;
     try {
       const recordes = await WarehouseAllocation.findAll({
         include: [
@@ -61,6 +63,7 @@ export class WarehouseAllocationController {
           { model: Warehouse, attributes: ["id", "name"] },
           { model: Good, attributes: ["id", "name"], include: [GoodType] },
         ],
+        offset
       });
       return res.sendSuccessResponse(202, recordes);
     } catch (err) {

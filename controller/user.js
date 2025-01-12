@@ -10,6 +10,7 @@ import { User } from "../model/user.js";
 import { ACCESS_TOKEN_KEY, ACCESS_TOKEN_EXPIRATION } from "../config.js";
 import RefreshToken from "../model/refresh-token.js";
 import { passwordValidaator, userValidaator } from "../utils/input-validator.js";
+import { Op } from "@sequelize/core";
 
 export class UserController {
   static async loginUser(req, res) {
@@ -170,9 +171,13 @@ export class UserController {
     }
   }
 
-  static async getAllUser(req, res) {
+  static async getAllUsers(req, res) {
     try {
+      let {page=1,limit=50,search=""}=req.query;
+      const offset = (page-1)*limit;
       const users = await User.findAll({
+        where:{fullname:{[Op.like]:`%${search}%`}},
+        offset,
         attributes: ["id", "fullname", "username"],
         include: Role,
       });

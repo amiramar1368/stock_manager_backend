@@ -1,3 +1,4 @@
+import { Op } from "@sequelize/core";
 import GoodType from "../model/good-type.js";
 import Good from "../model/good.js";
 
@@ -25,11 +26,15 @@ export class GoodController {
     }
   }
 
-  static async getAllGood(req, res) {
+  static async getAllGoods(req, res) {
+    let { page = 1, limit = 50, search = "" } = req.query;
+    const offset = (page - 1) * limit;
     try {
       const goods = await Good.findAll({
         attributes: ["id", "name"],
         include: [GoodType],
+        where: { name: { [Op.like]: `%${search}%` } },
+        offset,
       });
 
       return res.sendSuccessResponse(200, goods);
