@@ -3,13 +3,12 @@ import * as OTPAuth from "otpauth";
 import jwt from "jsonwebtoken";
 import QRCode from "qrcode";
 
-import { Role } from "../model/role.js";
-import { Permission } from "../model/permission.js";
-import { RolePermission } from "../model/role-permission.js";
-import { User } from "../model/user.js";
+import { Role } from "../model/role-model.js";
+import { Permission } from "../model/permission-model.js";
+import { RolePermission } from "../model/role-permission-model.js";
+import { User } from "../model/user-model.js";
 import { ACCESS_TOKEN_KEY, ACCESS_TOKEN_EXPIRATION } from "../config.js";
-import RefreshToken from "../model/refresh-token.js";
-import { passwordValidaator, userValidaator } from "../utils/input-validator.js";
+import RefreshToken from "../model/refresh-token-model.js";
 import { Op } from "@sequelize/core";
 
 export class UserController {
@@ -39,7 +38,11 @@ export class UserController {
 
               const userDetails = { ...userInfo, accessToken, refreshToken };
               req.user = userDetails;
-              return res.sendSuccessResponse(200, { user: userDetails }, "success login");
+              return res.sendSuccessResponse(
+                200,
+                { user: userDetails },
+                "success login"
+              );
             } else {
               let totp = new OTPAuth.TOTP({
                 issuer: "Stock Manager",
@@ -61,20 +64,33 @@ export class UserController {
 
                 const userDetails = { ...userInfo, accessToken, refreshToken };
                 req.user = userDetails;
-                res.sendSuccessResponse(200, { user: userDetails }, "success login");
+                res.sendSuccessResponse(
+                  200,
+                  { user: userDetails },
+                  "success login"
+                );
               } else {
-                return res.sendFailureResponse(500, "Error while generating QR Code");
+                return res.sendFailureResponse(
+                  500,
+                  "Error while generating QR Code"
+                );
               }
             }
           } else {
-            return res.sendFailureResponse(401, "username or password is wrong");
+            return res.sendFailureResponse(
+              401,
+              "username or password is wrong"
+            );
           }
         }
       } catch (err) {
         res.sendError(err);
       }
     } else {
-      return res.sendFailureResponse(401, "username and password are required!");
+      return res.sendFailureResponse(
+        401,
+        "username and password are required!"
+      );
     }
   }
 
@@ -91,7 +107,7 @@ export class UserController {
       if (err) {
         return res.sendFailureResponse(500, "Error while generating QR Code");
       }
-      return res.sendSuccessResponse(200, { qrCodeUrl});
+      return res.sendSuccessResponse(200, { qrCodeUrl });
     });
   }
 
@@ -101,7 +117,9 @@ export class UserController {
       if (!refreshToken) {
         return res.sendFailureResponse(403, "no token provided");
       }
-      const record = await RefreshToken.findOne({ where: { token: refreshToken } });
+      const record = await RefreshToken.findOne({
+        where: { token: refreshToken },
+      });
       if (!record) {
         return res.sendFailureResponse(403, "invalid token");
       }
@@ -116,7 +134,10 @@ export class UserController {
 
       await RefreshToken.destroy({ where: { userId: record.userId } });
       const newRefreshToken = await RefreshToken.createToken(user.id);
-      return res.sendSuccessResponse(202, { accessToken, refreshToken: newRefreshToken });
+      return res.sendSuccessResponse(202, {
+        accessToken,
+        refreshToken: newRefreshToken,
+      });
     } catch (err) {
       res.sendError(err);
     }
@@ -125,7 +146,7 @@ export class UserController {
   static async logoutUser(req, res) {
     try {
       await RefreshToken.destroy({ where: { userId: req.user.id } });
-      res.sendSuccessResponse(200, null, "success sign-out");
+      res.sendSuccessResponse(200, null, "sign-out successfully");
     } catch (err) {
       res.sendError(err);
     }
@@ -135,34 +156,21 @@ export class UserController {
     try {
       const user = req.user;
       const record = await User.findByPk(user.id);
-      record.is_2FA_active = true;
-      await record.save();
-      res.sendSuccessResponse(200, "success update");
+      await record.update({ is_2FA_active: true });
+      res.sendSuccessResponse(200, "active 2FA auth successfully");
     } catch (err) {
       res.sendError(err);
     }
   }
 
   static async addUser(req, res) {
-    let { username, fullname, roleId, password, confirmPassword } = req.body;
+    let { username, fullname, roleId, password } = req.body;
     try {
-      await userValidaator.validate({ username, fullname, roleId });
-      await passwordValidaator.validate({ password });
-      username = username.trim();
-      fullname = fullname.trim();
-      password = password.trim();
-      confirmPassword = confirmPassword.trim();
-
-      if (password !== confirmPassword) {
-        return res.sendFailureResponse(400, "password and confirm must be equal");
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create({
         username,
         fullname,
         roleId,
-        password: hashedPassword,
+        password,
         secretKey: new OTPAuth.Secret({ size: 20 }).base32,
       });
       return res.sendSuccessResponse(201, { id: newUser.id });
@@ -173,10 +181,11 @@ export class UserController {
 
   static async getAllUsers(req, res) {
     try {
-      let {page=1,limit=50,search=""}=req.query;
-      const offset = (page-1)*limit;
+      let { page = 1, limit = 10, search = "" } = req.query;
+      const offset = (page - 1) * limit;
       const users = await User.findAll({
-        where:{fullname:{[Op.like]:`%${search}%`}},
+        where: { fullname: { [Op.like]: `%${search}%` } },
+        limit,
         offset,
         attributes: ["id", "fullname", "username"],
         include: Role,
@@ -206,18 +215,14 @@ export class UserController {
   static async updateUser(req, res) {
     let { fullname, roleId, username, password } = req.body;
     try {
-      await userValidaator.validate({ username, fullname, roleId });
-      await passwordValidaator.validate({ password });
       const user = await User.findByPk(req.params.id);
       if (user) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.set({
+        user.update({
           fullname,
           roleId,
           username,
-          password: hashedPassword,
+          password,
         });
-        await user.save();
         return res.sendSuccessResponse(201);
       } else {
         return res.sendFailureResponse(404, "User Not Found");

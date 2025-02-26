@@ -2,8 +2,8 @@ import { DataTypes } from "@sequelize/core";
 
 import sequelize from "../utils/db.js";
 
-const GoodType = sequelize.define(
-  "good_type",
+const Category = sequelize.define(
+  "category",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -26,4 +26,4 @@ const GoodType = sequelize.define(
   }
 );
 
-export default GoodType;
+export default Category;

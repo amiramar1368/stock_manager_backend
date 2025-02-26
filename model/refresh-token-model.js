@@ -2,17 +2,12 @@ import { DataTypes } from "@sequelize/core";
 import { v4 as uuid } from "uuid";
 
 import sequelize from "../utils/db.js";
-import User from "./user.js";
+import User from "./user-model.js";
 import {REFRESH_TOKEN_EXPIRATION } from "../config.js";
 
 export const RefreshToken = sequelize.define(
   "refresh_token",
   {
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true,
-    },
     token: {
       type: DataTypes.STRING(3000),
       allowNull: false,
@@ -24,10 +19,6 @@ export const RefreshToken = sequelize.define(
   },
   { timestamps: false, noPrimaryKey: true }
 );
-
-RefreshToken.belongsTo(User, {
-  foreignKey: { name: "userId", onDelete: "NO ACTION", onUpdate: "CASCADE" },
-});
 
 RefreshToken.createToken = (userId) => {
   const d = new Date();

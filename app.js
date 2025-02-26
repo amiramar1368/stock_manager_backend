@@ -4,7 +4,7 @@ import cors from "cors";
 
 import { checkToken } from "./middleware/chek-token.js";
 import loginRoute from "./routes/login-router.js";
-import allRoutes from "./routes/all-router.js";
+import Routes from "./routes/index.js";
 
 import { PORT } from "./config.js";
 import sequelize from "./utils/db.js";
@@ -27,11 +27,9 @@ app.use(resposne);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-//login to system
-app.use("/users", loginRoute);
-
 //routes
-app.use(checkToken, allRoutes);
+app.use("/users", loginRoute);
+app.use(checkToken, Routes);
 
 //test for use scopes in sequelize
 // app.get("/test",async (req, res) => {

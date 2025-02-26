@@ -1,6 +1,6 @@
 import { Op } from "@sequelize/core";
-import GoodType from "../model/good-type.js";
-import Good from "../model/good.js";
+import GoodType from "../model/category-model.js";
+import Good from "../model/good-model.js";
 
 export class GoodController {
   static async addGood(req, res) {
@@ -39,7 +39,13 @@ export class GoodController {
 
       return res.sendSuccessResponse(200, goods);
     } catch (err) {
-      return res.sendError(err)
+      return res.sendError(err);
     }
   }
+
+  static async updateGood(req, res) {}
+
+  static async deleteGood(req, res) {}
+
+  static async getGoodById(req, res) {}
 }

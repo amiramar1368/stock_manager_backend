@@ -1,14 +1,13 @@
-import bcrypt from "bcryptjs";
 import * as OTPAuth from "otpauth";
 
-import User from "../model/user.js";
-import Role from "../model/role.js";
-import Permission from "../model/permission.js";
-import RolePermission from "../model/role-permission.js";
-import GoodType from "../model/good-type.js";
-import Good from "../model/good.js";
-import Warehouse from "../model/warehouse.js";
-import WarehouseStock from "../model/warehouse-stock.js";
+import User from "../model/user-model.js";
+import Role from "../model/role-model.js";
+import Permission from "../model/permission-model.js";
+import RolePermission from "../model/role-permission-model.js";
+import Category from "../model/category-model.js";
+import Good from "../model/good-model.js";
+import Warehouse from "../model/warehouse-model.js";
+import WarehouseStock from "../model/stock-model.js";
 
 async function insertTestRecord() {
   await Role.findOrCreate({
@@ -23,19 +22,18 @@ async function insertTestRecord() {
       permissionId: 1,
     },
   });
-  const password = await bcrypt.hash("123", 10);
   await User.findOrCreate({
     where: {
       username: "admin",
     },
     defaults: {
       fullname: "admin",
-      password,
+      password:"123",
       roleId: 1,
       secretKey: new OTPAuth.Secret({ size: 20 }).base32,
     },
   });
-  await GoodType.findOrCreate({
+  await Category.findOrCreate({
     where: {
       name: "Food",
     },
@@ -46,7 +44,7 @@ async function insertTestRecord() {
     },
     defaults: {
       createdBy: 1,
-      goodTypeId: 1,
+      categoryId: 1,
     },
   });
   await Good.findOrCreate({
@@ -55,7 +53,7 @@ async function insertTestRecord() {
     },
     defaults: {
       createdBy: 1,
-      goodTypeId: 1,
+      categoryId: 1,
     },
   });
   await Warehouse.findOrCreate({

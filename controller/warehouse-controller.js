@@ -1,6 +1,6 @@
-import Good from "../model/good.js";
-import Warehouse from "../model/warehouse.js";
-import WarehouseStock from "../model/warehouse-stock.js";
+import Good from "../model/good-model.js";
+import Warehouse from "../model/warehouse-model.js";
+import WarehouseStock from "../model/stock-model.js";
 import { Op } from "@sequelize/core";
 
 export class WarehouseController {
@@ -33,6 +33,10 @@ export class WarehouseController {
       res.sendError(err);
     }
   }
+
+  static async getWarehouseById(req,res){}
+  static async updateWarehouse(req,res){}
+  static async deleteWarehouse(req,res){}
 
   static async getRemainInWarehouse(req, res) {
     try {

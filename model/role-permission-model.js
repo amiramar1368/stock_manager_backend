@@ -6,21 +6,21 @@ export const RolePermission = sequelize.define(
   "role_permission",
   {
     id: {
-      type: DataTypes.TINYINT,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-    },
-    roleId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    permissionId: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
   },
   {
     timestamps: false,
+    indexes: [
+      {
+        type: "unique",
+        fields: ["roleId", "permissionId"],
+        msg: "role can not have repeat permission",
+      },
+    ],
   }
 );
 

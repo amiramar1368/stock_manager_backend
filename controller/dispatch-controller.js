@@ -1,11 +1,11 @@
 import sequelize from "../utils/db.js";
-import WarehouseDispatch from "../model/warehouse-dispatch.js";
-import Good from "../model/good.js";
-import User from "../model/user.js";
-import WarehouseStock from "../model/warehouse-stock.js";
+import WarehouseDispatch from "../model/dispatch-model.js";
+import Good from "../model/good-model.js";
+import User from "../model/user-model.js";
+import WarehouseStock from "../model/stock-model.js";
 
-export class WarehouseDispatchController {
-  static async addWarehouseDispatch(req, res) {
+export class DispatchController {
+  static async addDispatch(req, res) {
     let { number, goodId, recipient, description } = req.body;
     if (number != undefined && goodId != undefined && recipient != undefined) {
       try {
@@ -51,7 +51,7 @@ export class WarehouseDispatchController {
     }
   }
 
-  static async getAllWarehouseDispatch(req, res) {
+  static async getAllDispatchs(req, res) {
     let { page = 1, limit = 50 } = req.query;
     const offset = (page - 1) * limit;
     try {
@@ -67,4 +67,11 @@ export class WarehouseDispatchController {
       res.sendError(err);
     }
   }
+
+  static async getDispatchById(req,res){}
+
+  static async updateDispatch(req,res){}
+
+  static async deleteDispatch(req,res){}
+
 }

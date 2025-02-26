@@ -1,13 +1,13 @@
 import sequelize from "../utils/db.js";
-import WarehouseAllocation from "../model/warehouse-allocation.js";
-import Warehouse from "../model/warehouse.js";
-import Good from "../model/good.js";
-import User from "../model/user.js";
-import GoodType from "../model/good-type.js";
-import WarehouseStock from "../model/warehouse-stock.js";
+import WarehouseAllocation from "../model/allocation-model.js";
+import Warehouse from "../model/warehouse-model.js";
+import Good from "../model/good-model.js";
+import User from "../model/user-model.js";
+import GoodType from "../model/category-model.js";
+import WarehouseStock from "../model/stock-model.js";
 
-export class WarehouseAllocationController {
-  static async addWarehouseAllocation(req, res) {
+export class AllocationController {
+  static async addAllocation(req, res) {
     let { number, goodId, warehouseId, description } = req.body;
     if (number != undefined && goodId != undefined && warehouseId != undefined) {
       try {
@@ -53,7 +53,7 @@ export class WarehouseAllocationController {
     }
   }
 
-  static async getAllWarehouseAllocation(req, res) {
+  static async getAllAllocations(req, res) {
     let { page = 1, limit = 50} = req.query;
     const offset = (page - 1) * limit;
     try {
@@ -70,5 +70,11 @@ export class WarehouseAllocationController {
       res.sendError(err);
     }
   }
+
+static async getAllcationById(req,res){}
+
+static async updateAllocation(req,res){}
+
+static async deleteAllocation(req,res){}
 
 }

@@ -1,4 +1,4 @@
-import Role from "../model/role.js";
+import Role from "../model/role-model.js";
 
 export class RoleController {
   static async getAllRole(req, res) {
@@ -11,4 +11,12 @@ export class RoleController {
       res.sendError(err);
     }
   }
+
+  static async addRole(req,res){}
+
+  static async getRoleById(req,res){}
+
+  static async updateRole(req,res){}
+
+  static async deleteRole(req,res){}
 }
