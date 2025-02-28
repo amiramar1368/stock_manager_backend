@@ -1,6 +1,5 @@
 import { Router } from "express";
 
-import '../model/define-relation.js'
 import { RoleController } from "../controller/role-controller.js";
 import permission from '../middleware/permission.js';
 

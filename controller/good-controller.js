@@ -1,29 +1,35 @@
+import sequelize from "../utils/db.js";
 import { Op } from "@sequelize/core";
 import GoodType from "../model/category-model.js";
 import Good from "../model/good-model.js";
+import Stock from "../model/stock-model.js";
 
 export class GoodController {
   static async addGood(req, res) {
     const user = req.user;
-    let { name, goodTypeId } = req.body;
-    if (name != undefined && goodTypeId != undefined) {
+    let { categoryId, name } = req.body;
+    console.log(req.body)
       try {
-        const goodType = await GoodType.findByPk(goodTypeId);
-        if (!goodType) {
-          return res.sendFailureResponse(404, "goodType not found");
+        const category = await GoodType.findByPk(categoryId);
+        if (!category) {
+          return res.sendFailureResponse(404, "category not found");
         }
-        const good = await Good.create({
-          createdBy: user.id,
-          goodTypeId,
-          name,
+        sequelize.transaction(async () => {
+          const good = await Good.create({
+            createdBy: user.id,
+            categoryId,
+            name,
+          });
+          await Stock.create({
+            goodId:good.id,
+            number:0
+          })
+          return res.sendSuccessResponse(201, { goodId: good.id });
         });
-        return res.sendSuccessResponse(201, { goodId: good.id });
       } catch (err) {
         res.sendError(err);
       }
-    } else {
-      return res.sendFailureResponse(400, "not name and goodtype provided");
-    }
+   
   }
 
   static async getAllGoods(req, res) {

@@ -6,8 +6,6 @@ import Permission from "../model/permission-model.js";
 import RolePermission from "../model/role-permission-model.js";
 import Category from "../model/category-model.js";
 import Good from "../model/good-model.js";
-import Warehouse from "../model/warehouse-model.js";
-import WarehouseStock from "../model/stock-model.js";
 
 async function insertTestRecord() {
   await Role.findOrCreate({
@@ -54,27 +52,6 @@ async function insertTestRecord() {
     defaults: {
       createdBy: 1,
       categoryId: 1,
-    },
-  });
-  await Warehouse.findOrCreate({
-    where: {
-      name: "Warehouse1",
-    },
-  });
-  await WarehouseStock.findOrCreate({
-    where: {
-      goodId: 1,
-    },
-    defaults: {
-      number: 65,
-    },
-  });
-  await WarehouseStock.findOrCreate({
-    where: {
-      goodId: 2,
-    },
-    defaults: {
-      number: 30,
     },
   });
 }

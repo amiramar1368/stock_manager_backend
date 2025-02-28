@@ -1,6 +1,5 @@
 import { Router } from "express";
 
-import '../model/define-relation.js'
 import { CategoryController } from "../controller/category-controller.js";
 import permission from '../middleware/permission.js'
 

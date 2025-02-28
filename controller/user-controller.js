@@ -5,7 +5,6 @@ import QRCode from "qrcode";
 
 import { Role } from "../model/role-model.js";
 import { Permission } from "../model/permission-model.js";
-import { RolePermission } from "../model/role-permission-model.js";
 import { User } from "../model/user-model.js";
 import { ACCESS_TOKEN_KEY, ACCESS_TOKEN_EXPIRATION } from "../config.js";
 import RefreshToken from "../model/refresh-token-model.js";
@@ -52,7 +51,6 @@ export class UserController {
                 secret: user.secretKey,
               });
               // let seconds = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
-
               let delta = totp.validate({ token, window: 1 });
               if (delta !== null && delta !== -1) {
                 const accessToken = jwt.sign(userInfo, ACCESS_TOKEN_KEY, {
@@ -247,31 +245,23 @@ export class UserController {
   }
 }
 
-export async function getUserDetailes(condition) {
+async function getUserDetailes(condition) {
   let property = "id";
   if (typeof condition === "string") {
     property = "username";
   }
   const user = await User.findOne({
     where: { [property]: condition },
-    include: [
-      {
-        model: Role,
-        include: [
-          {
-            model: RolePermission,
-            association: Role.associations.permissionsRoles,
-            include: [Permission],
-          },
-        ],
-      },
-    ],
+    include: {
+      model: Role,
+      include: { model: Permission, through: { attributes: [] } },
+    },
   });
   if (user) {
     const permissions = [];
-    const permissionsDetail = user.role.permissionsRoles;
-    for (let i = 0; i < permissionsDetail.length; i++) {
-      permissions.push(permissionsDetail[i].permission.name);
+    const userPermissions = user.role.permissions;
+    for (let i = 0; i < userPermissions.length; i++) {
+      permissions.push(userPermissions[i].name);
     }
     return { user, permissions };
   }
