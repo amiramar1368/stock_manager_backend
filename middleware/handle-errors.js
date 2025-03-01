@@ -14,9 +14,13 @@ export default (req, res, next) => {
         statusCode = 400;
         message = error.errors[0];
       }
-    } else if (error?.name == "SequelizeForeignKeyConstraintError") {
+    } else if (error?.cause?.errno === 1452) {
       statusCode = 400;
-      message = "forbiden";
+      if(error.table==="categories"){
+        message="the proveded categoryId is not valid"
+      }else{
+        message = "foreign key constraint";
+      }
     }  else if (error instanceof Error) {
       message = error.message;
       statusCode = 400;
