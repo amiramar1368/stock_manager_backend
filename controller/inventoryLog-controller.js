@@ -48,14 +48,21 @@ export class InventoryLogController {
 
     const conditions = {};
     if (goodId) {
-      conditions.goodI = goodId;
+      conditions.goodId = goodId;
     }
     if (userId) {
       conditions.userId = userId;
     }
+    if (type) {
+      conditions.type = {
+        [Op.in]: [type]
+
+      }
+    }
+    console.log({ conditions, page, limit, type, goodId, userId, offset });
     try {
       const inventoryLogs = await InventoryLog.findAll({
-        where: { type: { [Op.like]: `%${type}%` }, ...conditions },
+        where: { ...conditions },
         include: [
           { model: User, attributes: ["id", "fullname"] },
           { model: Good, attributes: ["id", "name"] },
@@ -68,11 +75,35 @@ export class InventoryLogController {
     }
   }
 
-  static async getInventoryLogById(req, res) {}
+  static async getInventoryLogById(req, res) {
+    const id = +req.params.id;
+    try {
+      const inventoryLog = await InventoryLog.findByPk(id, {
+        include: [{ model: User, attributes: ["fullname"] }, { model: Good, attributes: ["name", "categoryId"] }]
+      });
+      if (!inventoryLog) return res.sendFailureResponse(404, "inventory not found");
+      res.sendSuccessResponse(200, inventoryLog, "fetch successfully")
+    } catch (err) {
+      res.sendError(err)
+    }
+  }
 
-  static async updateInventoryLog(req, res) {}
+  static async updateInventoryLog(req, res) {
+    const id = +req.params.id;
+    const { quantity, type, description, goodId, date } = req.body;
+    try {
+      const inventory = await InventoryLog.findByPk(id);
+      if (!inventory) return res.sendFailureResponse(404, "record not found");
+      await inventory.update({
+        quantity, type, description, goodId, date
+      });
+      res.sendSuccessResponse(201, null, "update successfully")
+    } catch (err) {
+      res.sendError(err)
+    }
+  }
 
-  static async deleteInventoryLog(req, res) {}
+  static async deleteInventoryLog(req, res) { }
 }
 
 export class StockController {

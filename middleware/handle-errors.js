@@ -1,15 +1,14 @@
 export default (req, res, next) => {
   const errorHandler = (error) => {
-    // console.log(error);
     let message = "failure";
     let statusCode = 500;
     if (error.errors?.length) {
       if (error.errors[0].type === "unique violation") {
         statusCode = 409;
-        message = error.errors[0].message;
+        message = error.errors.pop().message;
       } else if (error.errors[0].type == "Validation error") {
         statusCode = 400;
-        message = error.errors[0].message;
+        message = error.errors.pop().message;
       } else {
         statusCode = 400;
         message = error.errors[0];
@@ -20,6 +19,8 @@ export default (req, res, next) => {
         message="the proveded categoryId is not valid"
       }else if(error.table==="roles"){
         message="the proveded roleId is not valid"
+      }else if(error.table==="goods"){
+        message="the proveded goodId is not valid"
       } else{
         message = "foreign key constraint";
       }
