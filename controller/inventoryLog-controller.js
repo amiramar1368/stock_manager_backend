@@ -103,7 +103,19 @@ export class InventoryLogController {
     }
   }
 
-  static async deleteInventoryLog(req, res) { }
+  static async deleteInventoryLog(req, res) {
+    const id = +req.params.id;
+    try {
+      const rows = await InventoryLog.destroy({ where: { id } });
+      if (rows) {
+        res.sendSuccessResponse(200, null, "delete successfully")
+      } else {
+        res.sendFailureResponse(404, "not found")
+      }
+    } catch (err) {
+      res.sendError(err)
+    }
+  }
 }
 
 export class StockController {
