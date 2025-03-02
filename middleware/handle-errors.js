@@ -18,7 +18,9 @@ export default (req, res, next) => {
       statusCode = 400;
       if(error.table==="categories"){
         message="the proveded categoryId is not valid"
-      }else{
+      }else if(error.table==="roles"){
+        message="the proveded roleId is not valid"
+      } else{
         message = "foreign key constraint";
       }
     }  else if (error instanceof Error) {

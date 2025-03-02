@@ -9,6 +9,8 @@ import { User } from "../model/user-model.js";
 import { ACCESS_TOKEN_KEY, ACCESS_TOKEN_EXPIRATION } from "../config.js";
 import RefreshToken from "../model/refresh-token-model.js";
 import { Op } from "@sequelize/core";
+import { InventoryLog } from '../model/inventoryLog-model.js';
+import sequelize from "../utils/db.js";
 
 export class UserController {
   static async loginUser(req, res) {
@@ -125,6 +127,7 @@ export class UserController {
         return res.sendFailureResponse(403, "invalid token");
       }
       const { user, permissions } = await getUserDetailes(record.userId);
+      if (!user) return res.sendFailureResponse(404, "User Not Found");
       const userInfo = { id: user.id, fullname: user.fullname, permissions };
       const accessToken = jwt.sign(userInfo, ACCESS_TOKEN_KEY, {
         expiresIn: `${ACCESS_TOKEN_EXPIRATION}m`,
@@ -214,30 +217,40 @@ export class UserController {
     let { fullname, roleId, username, password } = req.body;
     try {
       const user = await User.findByPk(req.params.id);
-      if (user) {
-        user.update({
-          fullname,
-          roleId,
-          username,
-          password,
-        });
-        return res.sendSuccessResponse(201);
-      } else {
-        return res.sendFailureResponse(404, "User Not Found");
-      }
+      if (!user) return res.sendFailureResponse(404, "User Not Found");
+      await user.update({
+        fullname,
+        roleId,
+        username,
+        password,
+      });
+      return res.sendSuccessResponse(201,null,"update successfully");
+
     } catch (err) {
       return res.sendError(err);
     }
   }
 
   static async deleteUser(req, res) {
+    const id = +req.params.id;
     try {
-      const user = await User.findByPk(req.params.id);
-      if (user) {
-        await user.destroy();
-        return res.sendSuccessResponse(202);
+      const user = await User.findByPk(id);
+      if (!user) return res.sendFailureResponse(404, "User Not Found");
+      const force = req.query.force;
+      const inventoryLog = await InventoryLog.findOne({
+        where: {
+          userId: id
+        }
+      })
+      if (!inventoryLog || (inventoryLog && force === "true")) {
+        await sequelize.transaction(async () => {
+          await RefreshToken.destroy({ where: { userId: id } });
+          await InventoryLog.destroy({ where: { userId: id } })
+          await user.destroy();
+          return res.sendSuccessResponse(202);
+        })
       } else {
-        return res.sendFailureResponse(404, "User Not Found");
+        return res.sendFailureResponse(400, "this user has some record in Inventory table and can not remove it");
       }
     } catch (err) {
       res.sendError(err);
